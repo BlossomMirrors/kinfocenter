@@ -226,9 +226,6 @@ public:
         }
         m_distroLogo = logoPath;
 
-        // Default to not show Build
-        const bool showBuild = cg.readEntry("ShowBuild", false);
-
         // Check if distro want's us to show extra values
         const QString entryName = QStringLiteral("ExtraSoftwareData");
         const QStringList entries = cg.readXdgListEntry(entryName, QStringList());
@@ -236,16 +233,8 @@ public:
             m_extraDataEntries.push_back(new ThirdPartyEntry(script));
         }
 
-        // as a product brand is different from Kubuntu.
-        const QString distroName = cg.readEntry("Name", os.name());
-        const QString osrVersion = cg.readEntry("UseOSReleaseVersion", false) ? os.version() : os.versionId();
-        const QString versionId = cg.readEntry("Version", osrVersion);
-
-        auto versionEntry = new OSVersionEntry(distroName, versionId, showBuild ? os.buildId() : QString());
-        // This creates a trailing space if versionId is empty, so trimming String
-        // to remove possibly trailing spaces
-        m_distroNameVersion = versionEntry->localizedValue().trimmed();
-        m_entries.push_back(versionEntry);
+        // Use PRETTY_NAME from os-release
+        m_distroNameVersion = cg.readEntry("PrettyName", os.prettyName());
 
         const QString variant = cg.readEntry("Variant", os.variant());
         m_distroVariant = variant;
