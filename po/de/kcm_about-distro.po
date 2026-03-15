@@ -100,6 +100,24 @@ msgctxt "@label"
 msgid "Serial Number:"
 msgstr "Seriennummer:"
 
+#: src/ui/main.qml:211
+#, kde-format
+msgctxt "@title:group"
+msgid "Serial Numbers"
+msgstr "Seriennummern"
+
+#: main.cpp:384
+#, kde-format
+msgctxt "@label"
+msgid "Machine ID:"
+msgstr "Maschinennummer:"
+
+#: main.cpp:393
+#, kde-format
+msgctxt "@label"
+msgid "Device ID:"
+msgstr "Gerätenummer:"
+
 #: main.cpp:212 main.cpp:229
 #, kde-format
 msgctxt "@label unknown entry in table"

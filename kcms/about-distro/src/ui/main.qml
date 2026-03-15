@@ -206,6 +206,16 @@ KCMUtils.SimpleKCM {
                 model: kcm.hardwareEntries
                 delegate: entryComponent
             }
+
+            Item {
+                Kirigami.FormData.label: i18nc("@title:group", "Serial Numbers")
+                Kirigami.FormData.isSection: true
+            }
+
+            Repeater {
+                model: kcm.serialNumbersEntries
+                delegate: entryComponent
+            }
         }
     }
 
