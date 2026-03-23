@@ -2,7 +2,7 @@
 set -e
 
 PACKAGE_NAME=blossomos-kinfocenter
-VERSION=6.2.5
+VERSION=6.6.3
 RELEASE=1
 BUILDROOT=$(pwd)/rpmbuild
 SPECS_DIR=$BUILDROOT/SPECS
