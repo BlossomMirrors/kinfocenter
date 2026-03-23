@@ -54,7 +54,7 @@ KCM.SimpleKCM {
         {
             title: i18n("Environment"),
             info: [
-                {label: i18n("Temperature"), source: "temperature", format: format_unit(i18nc("Degree Celsius", "°C"), 2)}
+                {label: i18n("Temperature"), source: "temperature", format: format_temperature}
             ]
         },
     ]
@@ -72,13 +72,22 @@ KCM.SimpleKCM {
     }
 
     function format_percentage(value) {
-        return i18nc("%1 is a percentage value", "%1%", value);
+        return value >= 0 ? i18nc("%1 is a percentage value", "%1%", value) : "";
     }
 
     function format_unit(unit, precision) {
         return (value) => {
             const fmtValue = Number(value).toLocaleString(Qt.locale(), "f", precision);
             return i18nc("%1 is value, %2 is unit", "%1 %2", fmtValue, unit);
+        }
+    }
+
+    function format_temperature(value) {
+        if (value >= -273.15) {
+            const fmtValue = Number(value).toLocaleString(Qt.locale(), "f", 2);
+            return i18nc("Degree Celsius", "%1 °C", fmtValue);
+        } else {
+            return "";
         }
     }
 
@@ -184,7 +193,6 @@ KCM.SimpleKCM {
                                     switch(deviceItem.battery.type) {
                                         case 1: return "phone"
                                         case 2: return "battery-ups"
-                                        case 3: return deviceItem.battery.chargeState === Battery.Charging ? "battery-full-charging" : "battery-full"
                                         case 4: return "input-mouse"
                                         case 5: return "input-keyboard"
                                         case 6: return "input-keyboard" // TODO: New Icon Required?
@@ -197,8 +205,15 @@ KCM.SimpleKCM {
                                         case 13: return "headphone"
                                         case 14: return "headset"
                                         case 15: return "input-touchpad"
-                                        default: return "paint-unknown"
                                     }
+
+                                    // Show percent icons for PC (case 3) or unknown battery types.
+                                    const roundedPercent = Math.ceil(deviceItem.battery.chargePercent / 10) * 10;
+                                    let iconName = "battery-" + String(roundedPercent).padStart(3, "0");
+                                    if (deviceItem.battery.chargeState === Battery.Charging) {
+                                        iconName += "-charging";
+                                    }
+                                    return iconName;
                                 }
                             }
 
@@ -225,10 +240,11 @@ KCM.SimpleKCM {
                                             case 13: return i18n("Headphone Battery")
                                             case 14: return i18n("Headset Battery")
                                             case 15: return i18n("Touchpad Battery")
-                                            default: return i18n("Unknown Battery")
+                                            default: return i18n("Battery")
                                         }
                                     }
                                     elide: Text.ElideRight
+                                    textFormat: Text.PlainText
                                     maximumLineCount : 1
                                 }
 
@@ -237,6 +253,7 @@ KCM.SimpleKCM {
                                     text: deviceItem.product
                                     color: Kirigami.Theme.disabledTextColor
                                     elide: Text.ElideRight
+                                    textFormat: Text.PlainText
                                     maximumLineCount : 1
                                 }
                             }
@@ -255,6 +272,7 @@ KCM.SimpleKCM {
                                 text: deviceItem.battery.chargeState === Battery.Charging ?
                                     i18nc("Battery charge percentage", "%1% (Charging)", Math.round(percentageSlider.value)) :
                                     i18nc("Battery charge percentage", "%1%", Math.round(percentageSlider.value))
+                                textFormat: Text.PlainText
                             }
                         }
                     }
@@ -399,6 +417,7 @@ KCM.SimpleKCM {
 
                 Kirigami.Heading {
                     text: currentLayout.title
+                    textFormat: Text.PlainText
                     Kirigami.FormData.isSection: true
                     level: 2
                     // HACK hide section header if all labels are invisible
@@ -432,6 +451,7 @@ KCM.SimpleKCM {
                             const value = isBatteryProperty ? root.currentBattery[valueLabel.source] : root[`current${valueLabel.source}`]
                             return value ? valueLabel.format(value) : ""
                         }
+                        textFormat: Text.PlainText
                     }
                 }
             }
