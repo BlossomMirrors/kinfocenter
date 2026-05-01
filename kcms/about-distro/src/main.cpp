@@ -9,10 +9,13 @@
 #include <QAbstractListModel>
 #include <QClipboard>
 #include <QFileInfo>
+#include <QFile>
 #include <QGuiApplication>
 #include <QIcon>
 #include <QLocale>
 #include <QLoggingCategory>
+#include <QCryptographicHash>
+#include <QNetworkInterface>
 #include <QWindow>
 
 #include <KAuth/Action>
@@ -37,6 +40,66 @@
 #include "ServiceRunner.h"
 #include "ThirdPartyEntry.h"
 #include "Version.h"
+
+// Helper: read /etc/machine-id
+static QString readMachineID()
+{
+    QFile machineIdFile(QStringLiteral("/etc/machine-id"));
+    if (!machineIdFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return QString();
+    }
+    const QString machineId = QString::fromUtf8(machineIdFile.readAll()).trimmed();
+    machineIdFile.close();
+    return machineId;
+}
+
+// Helper: generate Device ID from primary MAC address
+static QString getDeviceID()
+{
+    // Find primary MAC address
+    QString macAddress;
+    const auto ifaces = QNetworkInterface::allInterfaces();
+    for (const auto &iface : ifaces) {
+        // skip loopback and down interfaces
+        if (!(iface.flags() & QNetworkInterface::IsUp) || (iface.flags() & QNetworkInterface::IsLoopBack)) {
+            continue;
+        }
+        const QString hw = iface.hardwareAddress();
+        if (!hw.isEmpty() && hw != QLatin1String("00:00:00:00:00:00")) {
+            macAddress = hw;
+            break;
+        }
+    }
+
+    if (macAddress.isEmpty()) {
+        return QString();
+    }
+
+    // Hash MAC with SHA256
+    const QByteArray macBytes = macAddress.toUtf8();
+    const QByteArray hash = QCryptographicHash::hash(macBytes, QCryptographicHash::Sha256);
+
+    // Base32 encode (RFC4648 without padding) and take first 12 chars
+    static const char base32Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    QString base32;
+    int bits = 0;
+    int buffer = 0;
+    for (unsigned char byte : hash) {
+        buffer = (buffer << 8) | byte;
+        bits += 8;
+        while (bits >= 5 && base32.size() < 12) {
+            bits -= 5;
+            int idx = (buffer >> bits) & 0x1F;
+            base32 += QChar(base32Table[idx]);
+        }
+    }
+    if (base32.size() < 12 && bits > 0) {
+        int idx = (buffer << (5 - bits)) & 0x1F;
+        base32 += QChar(base32Table[idx]);
+    }
+
+    return base32.left(12);
+}
 
 class EntryModel : public QAbstractListModel
 {
@@ -163,9 +226,6 @@ public:
         }
         m_distroLogo = logoPath;
 
-        // Default to not show Build
-        const bool showBuild = cg.readEntry("ShowBuild", false);
-
         // Check if distro want's us to show extra values
         const QString entryName = QStringLiteral("ExtraSoftwareData");
         const QStringList entries = cg.readXdgListEntry(entryName, QStringList());
@@ -173,16 +233,8 @@ public:
             m_extraDataEntries.push_back(new ThirdPartyEntry(script));
         }
 
-        // as a product brand is different from Kubuntu.
-        const QString distroName = cg.readEntry("Name", os.name());
-        const QString osrVersion = cg.readEntry("UseOSReleaseVersion", false) ? os.version() : os.versionId();
-        const QString versionId = cg.readEntry("Version", osrVersion);
-
-        auto versionEntry = new OSVersionEntry(distroName, versionId, showBuild ? os.buildId() : QString());
-        // This creates a trailing space if versionId is empty, so trimming String
-        // to remove possibly trailing spaces
-        m_distroNameVersion = versionEntry->localizedValue().trimmed();
-        m_entries.push_back(versionEntry);
+        // Use PRETTY_NAME from os-release
+        m_distroNameVersion = cg.readEntry("PrettyName", os.prettyName());
 
         const QString variant = cg.readEntry("Variant", os.variant());
         m_distroVariant = variant;
@@ -284,9 +336,13 @@ public:
             for (auto it = data.cbegin(); it != data.cend(); ++it) {
                 addEntriesToGrid(m_hardwareEntries, {new Entry(systemInfoKey(it.key()), it.value().toString())});
             }
-            // Insert hidden entries at the end so it doesn't look weird visually to have a button mid-layout.
+            // Move serial number to serial numbers section
             if (!systemSerialNumber.isEmpty()) {
-                addEntriesToGrid(m_hardwareEntries, {new Entry(systemInfoKey(systemSerialNumberKey), systemSerialNumber, Entry::Hidden::Yes)});
+                auto entry = new Entry(systemInfoKey(systemSerialNumberKey), systemSerialNumber, Entry::Hidden::Yes);
+                if (entry->isValid()) {
+                    m_serialNumbersEntries->append(entry);
+                    m_entries.push_back(entry);
+                }
             }
 
             Q_EMIT changed();
@@ -310,6 +366,25 @@ public:
             Q_EMIT changed();
         }
 #endif // Q_OS_LINUX || Q_OS_ANDROID
+
+        // Populate serial numbers section
+        const QString machineId = readMachineID();
+        if (!machineId.isEmpty()) {
+            auto entry = new Entry(ki18nc("@label", "Machine ID:"), machineId, Entry::Hidden::Yes);
+            if (entry->isValid()) {
+                m_serialNumbersEntries->append(entry);
+                m_entries.push_back(entry);
+            }
+        }
+
+        const QString deviceId = getDeviceID();
+        if (!deviceId.isEmpty()) {
+            auto entry = new Entry(ki18nc("@label", "Device ID:"), deviceId, Entry::Hidden::Yes);
+            if (entry->isValid()) {
+                m_serialNumbersEntries->append(entry);
+                m_entries.push_back(entry);
+            }
+        }
 
         Q_EMIT changed();
     }
@@ -353,6 +428,8 @@ private:
     EntryModel *m_softwareEntries = new EntryModel(this);
     Q_PROPERTY(EntryModel *hardwareEntries MEMBER m_hardwareEntries CONSTANT)
     EntryModel *m_hardwareEntries = new EntryModel(this);
+    Q_PROPERTY(EntryModel *serialNumbersEntries MEMBER m_serialNumbersEntries CONSTANT)
+    EntryModel *m_serialNumbersEntries = new EntryModel(this);
 
     Q_PROPERTY(QString distroLogo MEMBER m_distroLogo NOTIFY changed)
     QString m_distroLogo;
