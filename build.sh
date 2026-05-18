@@ -74,7 +74,6 @@ cp -a $INSTALL_DIR/* %{buildroot}/
 %files
 %{_bindir}/kinfocenter
 %{_libdir}/qt6/plugins/plasma/kcms/kcm_about-distro.so
-%{_libdir}/qt6/plugins/plasma/kcms/kcm_energyinfo.so
 %{_libdir}/qt6/plugins/plasma/kcms/kinfocenter/*.so
 %{_libdir}/qt6/qml/org/kde/kinfocenter/
 %{_libdir}/libexec/kinfocenter-opengl-helper
