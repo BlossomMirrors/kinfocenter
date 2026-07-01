@@ -1,21 +1,25 @@
-# KInfoCenter
+# kinfocenter (BlossomOS patches)
 
-KInfoCenter is used to display information about your computer's hardware on the KDE desktop.
-This repository hosts the modules for it while the main shell is [System Settings](https://invent.kde.org/plasma/systemsettings).
+BlossomOS-specific patches for KInfoCenter, published to [repo.blossomos.org/rpm](https://repo.blossomos.org/rpm/).
 
-## Contributing
-KInfoCenter is developed under the KDE umbrella and uses KDE infrastructure
-for development.
-Please note that pull requests on GitHub aren't supported. The recommended
-way of contributing patches is via KDE's instance of GitLab at https://invent.kde.org/plasma/kinfocenter.
+Rather than carrying a full fork of KInfoCenter, this repo just holds a small patch series applied on top of Fedora's stock `kinfocenter` package.
 
-## Build instructions
-Build instructions can be found at https://community.kde.org/Get_Involved/development#Build_some_software.
+## Usage
 
-## Release Schedule
-KInfoCenter follows the KDE Plasma [release cycle](https://community.kde.org/Schedules/Plasma_5).
+```
+./build.sh [fedora_version]
+```
 
-## Reporting Bugs
-Please report bugs at KDE's Bugzilla at https://bugs.kde.org/enter_bug.cgi?product=kinfocenter.
-For discussions, the #kde-devel IRC channel and the kde-devel mailing list
-are good places to post.
+Defaults to `rawhide`. Pass a Fedora release number (e.g. `44`) to build against that release's `kinfocenter` instead. The built RPMs land in `build/rpmbuild/RPMS/`.
+
+The script fetches the latest `kinfocenter` SRPM from Koji, caches it in `cache/` to avoid re-downloading, strips any mbox email headers from patch files, injects the patch declarations into the spec, installs build dependencies via `dnf builddep`, and runs `rpmbuild`.
+
+## Adding patches
+
+Drop `.patch` files into `patches/`. Files are applied in filename order, so prefix them with a zero-padded number (`0002-my-fix.patch`). Mbox-format patches (e.g. from `git format-patch`) work as-is.
+
+## Patches
+
+| # | Patch | Purpose |
+|---|-------|---------|
+| 0001 | About Distro: Serial Numbers section, PRETTY_NAME | Adds a Serial Numbers section (Machine ID from `/etc/machine-id`, Device ID derived from the primary MAC address) next to the existing system serial number, and switches the distro name/version display to `PRETTY_NAME` from os-release |

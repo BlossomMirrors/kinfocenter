@@ -1,107 +1,123 @@
-#!/bin/bash
-set -e
+#!/usr/bin/bash
+set -eou pipefail
 
-PACKAGE_NAME=blossomos-kinfocenter
-VERSION=6.6.3
-RELEASE=1
-BUILDROOT=$(pwd)/rpmbuild
-SPECS_DIR=$BUILDROOT/SPECS
-SOURCES_DIR=$BUILDROOT/SOURCES
-BUILD_DIR=$(pwd)/build
-INSTALL_DIR=$BUILDROOT/INSTALL
+FEDORA_VERSION="${1:-rawhide}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BUILD_DIR="${SCRIPT_DIR}/build"
+CACHE_DIR="${SCRIPT_DIR}/cache"
 
-# Clean and prepare build directories
-rm -rf $BUILDROOT
-mkdir -p $SPECS_DIR $SOURCES_DIR $INSTALL_DIR
+patch_file_list() {
+    # Sort by basename (the zero-padded number prefix) so patches apply in order.
+    find "${SCRIPT_DIR}/patches" -name '*.patch' -printf '%f\t%p\n' | sort | cut -f2-
+}
 
-# Build kinfocenter first
-echo "Building kinfocenter..."
-rm -rf $BUILD_DIR
-mkdir -p $BUILD_DIR
-cd $BUILD_DIR
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr \
-         -DCMAKE_BUILD_TYPE=Release \
-         -DKDE_INSTALL_LIBDIR=lib64 \
-         -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
-make -j$(nproc)
+fetch_srpm() {
+    local nvr
+    if [[ "${FEDORA_VERSION}" == "rawhide" ]]; then
+        nvr="$(koji latest-build rawhide kinfocenter | awk '/^kinfocenter/{print $1; exit}')"
+    else
+        nvr="$(koji latest-build "f${FEDORA_VERSION}-updates" kinfocenter 2>/dev/null | awk '/^kinfocenter/{print $1; exit}')"
+        [[ -z "$nvr" ]] && nvr="$(koji latest-build "f${FEDORA_VERSION}" kinfocenter | awk '/^kinfocenter/{print $1; exit}')"
+    fi
 
-# Install to temporary location for packaging
-echo "Installing to temporary directory..."
-DESTDIR=$INSTALL_DIR make install
-cd ..
+    local cached="${CACHE_DIR}/${nvr}.src.rpm"
+    if [[ -f "${cached}" ]]; then
+        echo "==> Using cached SRPM: ${nvr}.src.rpm" >&2
+    else
+        echo "==> Fetching ${nvr}.src.rpm..." >&2
+        mkdir -p "${CACHE_DIR}"
+        (cd "${CACHE_DIR}" && koji download-build --arch=src "${nvr}") >&2
+    fi
+    cp "${cached}" "${BUILD_DIR}/${nvr}.src.rpm"
+    echo "${nvr}.src.rpm"
+}
 
-SPECFILE=$SPECS_DIR/$PACKAGE_NAME.spec
+apply_patches_to_spec() {
+    local spec="$1"
+    local patch_files=()
+    while IFS= read -r f; do
+        patch_files+=("$f")
+    done < <(patch_file_list)
 
-# Write the specfile
-cat > $SPECFILE <<EOF
-Name:           $PACKAGE_NAME
-Version:        $VERSION
-Release:        $RELEASE%{?dist}
-Summary:        BlossomOS customized KInfoCenter with Serial Numbers section
-License:        GPL-2.0-or-later
-BuildArch:      x86_64
+    if [[ "${#patch_files[@]}" -eq 0 ]]; then
+        echo "==> No patches found, skipping"
+        return
+    fi
 
-Provides:       kinfocenter
-Obsoletes:      kinfocenter
+    local names=()
+    for patch in "${patch_files[@]}"; do
+        local name
+        name="$(basename "${patch}")"
+        # Strip mbox transport headers (everything up to the first blank line).
+        # What remains is the email body: commit message + --- + diff, which
+        # both /usr/bin/patch and git apply handle correctly.
+        python3 -c "
+import sys
+content = open(sys.argv[1]).read()
+idx = content.find('\n\n')
+sys.stdout.write(content[idx + 2:] if idx >= 0 else content)
+" "${patch}" > "${BUILD_DIR}/rpmbuild/SOURCES/${name}"
+        names+=("${name}")
+    done
 
-Requires:       kf6-kcoreaddons
-Requires:       kf6-kconfig
-Requires:       kf6-ki18n
-Requires:       kf6-kcmutils
-Requires:       kf6-kio
-Requires:       kf6-solid
-Requires:       kf6-kauth
-Requires:       qt6-qtbase
+    # Only inject Patch9000: declarations — the spec's own patching loop
+    # (%autosetup -p1 / %autopatch) picks them up and applies them in order.
+    python3 - "${spec}" "${names[@]}" <<'PYEOF'
+import sys, re
 
-%description
-KInfoCenter provides a centralized and convenient overview of your
-system and desktop environment.
+spec_path = sys.argv[1]
+patch_names = sys.argv[2:]
 
-This BlossomOS version includes:
-- Serial Numbers section with Machine ID, Device ID, and Board Serial Number
-- German translations for Serial Numbers section (Seriennummern)
-- Uses PRETTY_NAME from /etc/os-release for distribution name
+with open(spec_path) as f:
+    lines = f.readlines()
 
-%prep
-# nothing to prepare
+patch_decls = [f'Patch{9000 + j}: {name}\n' for j, name in enumerate(patch_names)]
 
-%build
-# already built
+# Find the last Patch\d+: line in the spec header (before any % section)
+last_patch_idx = -1
+for i, line in enumerate(lines):
+    if line.startswith('%'):
+        break
+    if re.match(r'^Patch\d+:', line):
+        last_patch_idx = i
 
-%install
-cp -a $INSTALL_DIR/* %{buildroot}/
+if last_patch_idx >= 0:
+    lines = lines[:last_patch_idx + 1] + patch_decls + lines[last_patch_idx + 1:]
+else:
+    for i, line in enumerate(lines):
+        if line.startswith('%description'):
+            lines = lines[:i] + patch_decls + lines[i:]
+            break
 
-%files
-%{_bindir}/kinfocenter
-%{_libdir}/qt6/plugins/plasma/kcms/kcm_about-distro.so
-%{_libdir}/qt6/plugins/plasma/kcms/kinfocenter/*.so
-%{_libdir}/qt6/qml/org/kde/kinfocenter/
-%{_libdir}/libexec/kinfocenter-opengl-helper
-%{_libdir}/libexec/kinfocenter-vulkan-helper
-%{_libdir}/libKInfoCenterInternal.so
-%{_libexecdir}/kf6/kauth/kinfocenter-dmidecode-helper
-%{_datadir}/applications/*.desktop
-%{_datadir}/kinfocenter/
-%{_datadir}/metainfo/org.kde.kinfocenter.appdata.xml
-%{_datadir}/locale/*/LC_MESSAGES/*.mo
-%{_datadir}/dbus-1/system.d/org.kde.kinfocenter.dmidecode.conf
-%{_datadir}/dbus-1/system-services/org.kde.kinfocenter.dmidecode.service
-%{_datadir}/polkit-1/actions/org.kde.kinfocenter.dmidecode.policy
-%{_datadir}/doc/HTML/*/kinfocenter/
+with open(spec_path, 'w') as f:
+    f.writelines(lines)
 
-%changelog
-* Sun Mar 15 2026 Leonie Ain <me@koyu.space> - 6.2.5-1
-- Added Serial Numbers section with Machine ID, Device ID, and Board Serial Number
-- Added German translations (Maschinennummer, Gerätenummer, Seriennummern)
-- Changed to use PRETTY_NAME from /etc/os-release
-- Hidden serial numbers by default with show/hide toggle buttons
-EOF
+print(f"Added {len(patch_names)} Patch declaration(s) to spec header")
+PYEOF
+}
 
-# Build the RPM
-echo "Building RPM..."
-rpmbuild -bb $SPECFILE --define "_topdir $BUILDROOT"
+main() {
+    rm -rf "${BUILD_DIR}"
+    mkdir -p "${BUILD_DIR}/rpmbuild/"{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 
-echo ""
-echo "RPM built successfully!"
-echo "Location: $BUILDROOT/RPMS/x86_64/$PACKAGE_NAME-$VERSION-$RELEASE.*.rpm"
-ls -lh $BUILDROOT/RPMS/x86_64/*.rpm
+    cd "${BUILD_DIR}"
+    local srpm
+    srpm="$(fetch_srpm)"
+    echo "==> Installing SRPM: ${srpm}"
+    rpm -ivh "${srpm}" --define "_topdir ${BUILD_DIR}/rpmbuild"
+
+    local spec="${BUILD_DIR}/rpmbuild/SPECS/kinfocenter.spec"
+    apply_patches_to_spec "${spec}"
+
+    echo "==> Installing build dependencies..."
+    sudo dnf builddep -y "${spec}"
+
+    echo "==> Building kinfocenter RPMs..."
+    rpmbuild -ba "${spec}" \
+        --define "_topdir ${BUILD_DIR}/rpmbuild" \
+        2>&1 | tee "${BUILD_DIR}/build.log"
+
+    echo "==> Done. RPMs are in ${BUILD_DIR}/rpmbuild/RPMS/"
+}
+
+main
