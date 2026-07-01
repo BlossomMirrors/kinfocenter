@@ -26,7 +26,7 @@ include(ECMQmlModule)
 
 option(BUILD_DOC "Whether to build the documentation" ON)
 
-find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core Gui Widgets Graphs)
 
 find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
     Config
@@ -41,6 +41,7 @@ find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS
 
 find_package(PkgConfig)
 pkg_check_modules(libdrm REQUIRED IMPORTED_TARGET libdrm)
+pkg_check_modules(egl REQUIRED IMPORTED_TARGET egl)
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
     find_package(UDev REQUIRED COMPONENTS UDev)
@@ -74,7 +75,7 @@ add_definitions(-DQT_NO_NARROWING_CONVERSIONS_IN_CONNECT)
 add_definitions(-DQT_NO_URL_CAST_FROM_STRING)
 add_definitions(-DQT_USE_QSTRINGBUILDER)
 ecm_set_disabled_deprecation_versions(QT 6.11.0
-    KF 6.23.0
+    KF 6.27.0
 )
 
 

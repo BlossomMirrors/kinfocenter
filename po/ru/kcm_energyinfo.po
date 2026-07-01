@@ -1,15 +1,15 @@
 # Copyright (C) YEAR This_file_is_part_of_KDE
 # This file is distributed under the same license as the PACKAGE package.
 #
-# SPDX-FileCopyrightText: 2019, 2021, 2022, 2023, 2025, 2026 Alexander Yavorsky <kekcuha@gmail.com>
+# SPDX-FileCopyrightText: 2019, 2021-2023, 2025-2026 Alexander Yavorsky <kekcuha@gmail.com>
 # Alexander Potashev <aspotashev@gmail.com>, 2015, 2016, 2019.
 # Alexander Yavorsky <kekcuha@gmail.com>, 2025.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://bugs.kde.org\n"
-"POT-Creation-Date: 2026-03-24 00:45+0000\n"
-"PO-Revision-Date: 2026-04-03 19:28+0200\n"
+"POT-Creation-Date: 2026-06-10 00:47+0000\n"
+"PO-Revision-Date: 2026-06-26 20:44+0200\n"
 "Last-Translator: Alexander Yavorskiy <kekcuha@gmail.com>\n"
 "Language-Team: Russian <kde-russian@lists.kde.ru>\n"
 "Language: ru\n"
@@ -18,7 +18,13 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
 "%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Lokalize 25.12.3\n"
+"X-Generator: Lokalize 26.04.2\n"
+
+#: ui/Graph.qml:182
+#, kde-format
+msgctxt "@info:status"
+msgid "No history information for this time span"
+msgstr "Информация об энергопотреблении за этот период недоступна"
 
 #: ui/main.qml:31 ui/main.qml:243
 #, kde-format
@@ -81,7 +87,7 @@ msgctxt "current power draw from the battery in W"
 msgid "Consumption"
 msgstr "Энергопотребление"
 
-#: ui/main.qml:47 ui/main.qml:313
+#: ui/main.qml:47
 #, kde-format
 msgctxt "Watt"
 msgid "W"
@@ -310,68 +316,74 @@ msgctxt "Battery charge percentage"
 msgid "%1%"
 msgstr "%1%"
 
-#: ui/main.qml:332
+#: ui/main.qml:314
 #, kde-format
-msgctxt "@info:status"
-msgid "No history information for this time span"
-msgstr "Информация об энергопотреблении за этот период недоступна"
+msgctxt "%1 is the unit"
+msgid "%1"
+msgstr "%1"
 
-#: ui/main.qml:342
+#: ui/main.qml:315
+#, kde-format
+msgctxt "this is a format string, equivalent to '%'"
+msgid " %%"
+msgstr " %%"
+
+#: ui/main.qml:334
 #, kde-format
 msgid "Charge Percentage"
 msgstr "Процент заряда"
 
-#: ui/main.qml:352
+#: ui/main.qml:344
 #, kde-format
 msgid "Energy Consumption"
 msgstr "Энергопотребление"
 
-#: ui/main.qml:368
+#: ui/main.qml:360
 #, kde-format
 msgid "Last hour"
 msgstr "Последний час"
 
-#: ui/main.qml:369
+#: ui/main.qml:361
 #, kde-format
 msgid "Last 2 hours"
 msgstr "Последние 2 часа"
 
-#: ui/main.qml:370
+#: ui/main.qml:362
 #, kde-format
 msgid "Last 12 hours"
 msgstr "Последние 12 часов"
 
-#: ui/main.qml:371
+#: ui/main.qml:363
 #, kde-format
 msgid "Last 24 hours"
 msgstr "Последние 24 часа"
 
-#: ui/main.qml:372
+#: ui/main.qml:364
 #, kde-format
 msgid "Last 48 hours"
 msgstr "Последние 48 часов"
 
-#: ui/main.qml:373
+#: ui/main.qml:365
 #, kde-format
 msgid "Last 7 days"
 msgstr "Последние 7 дней"
 
-#: ui/main.qml:381
+#: ui/main.qml:373
 #, kde-format
 msgid "Timespan"
 msgstr "Промежуток времени"
 
-#: ui/main.qml:382
+#: ui/main.qml:374
 #, kde-format
 msgid "Timespan of data to display"
 msgstr "Показывать данные для этого промежутка времени"
 
-#: ui/main.qml:388
+#: ui/main.qml:380
 #, kde-format
 msgid "Refresh"
 msgstr "Обновить"
 
-#: ui/main.qml:447
+#: ui/main.qml:439
 #, kde-format
 msgid "%1:"
 msgstr "%1:"

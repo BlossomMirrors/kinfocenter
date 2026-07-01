@@ -1,89 +1,89 @@
-# Copyright (C) 2024 This file is copyright:
+# Uyghur translation for kcm_energyinfo.
+# Copyright (C) YEAR This file is copyright:
 # This file is distributed under the same license as the kinfocenter package.
+# Abduqadir Abliz <sahranbay@gmail.com>, 2026., YEAR.
 #
-# SPDX-FileCopyrightText: 2024, 2025, 2026 Toms Trasuns <toms.trasuns@posteo.net>
 msgid ""
 msgstr ""
 "Project-Id-Version: kinfocenter\n"
 "Report-Msgid-Bugs-To: https://bugs.kde.org\n"
 "POT-Creation-Date: 2026-06-10 00:47+0000\n"
-"PO-Revision-Date: 2026-02-06 14:16+0200\n"
-"Last-Translator: Toms Trasuns <toms.trasuns@posteo.net>\n"
-"Language-Team: Latvian <kde-i18n-doc@kde.org>\n"
-"Language: lv\n"
+"PO-Revision-Date: 2026-05-31 18:40-0400\n"
+"Last-Translator: Abduqadir Abliz <sahranbay@gmail.com>\n"
+"Language-Team: Uyghur <kde-i18n-doc@kde.org>\n"
+"Language: ug\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : "
-"2);\n"
-"X-Generator: Lokalize 25.12.1\n"
+"X-Generator: Poedit 3.9\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: ui/Graph.qml:182
 #, kde-format
 msgctxt "@info:status"
 msgid "No history information for this time span"
-msgstr "Šim laika nogrieznim nav vēsturiskas informācijas"
+msgstr "بۇ ۋاقىت بۆلىكىدىكى تارىخ ئۇچۇرى يوق"
 
 #: ui/main.qml:31 ui/main.qml:243
 #, kde-format
 msgid "Battery"
-msgstr "Baterija"
+msgstr "توكدان"
 
 #: ui/main.qml:33
 #, kde-format
 msgid "Rechargeable"
-msgstr "Uzlādējama"
+msgstr "توكلاشچان"
 
 #: ui/main.qml:34
 #, kde-format
 msgid "Charge state"
-msgstr "Uzlādes statuss"
+msgstr "توكلاش ھالىتى"
 
 #: ui/main.qml:35
 #, kde-format
 msgid "Current charge"
-msgstr "Uzlādes līmenis"
+msgstr "نۆۋەتتىكى توكلىنىشى"
 
 #: ui/main.qml:36
 #, kde-format
 msgid "Health"
-msgstr "Veselība"
+msgstr "ساغلاملىق"
 
 #: ui/main.qml:37
 #, kde-format
 msgid "Charge Cycles"
-msgstr "Uzlādes cikli"
+msgstr "توكلاش دەۋرىيلىكى"
 
 #: ui/main.qml:38
 #, kde-format
 msgid "Vendor"
-msgstr "Ražotājs"
+msgstr "تارقاتقۇچى"
 
 #: ui/main.qml:39
 #, kde-format
 msgid "Model"
-msgstr "Modelis"
+msgstr "ئەندىزە"
 
 #: ui/main.qml:40
 #, kde-format
 msgid "Serial Number"
-msgstr "Sērijas numurs"
+msgstr "تەرتىپ نومۇرى"
 
 #: ui/main.qml:41
 #, kde-format
 msgid "Technology"
-msgstr "Tehnoloģija"
+msgstr "تېخنىكا"
 
 #: ui/main.qml:45
 #, kde-format
 msgid "Energy"
-msgstr "Enerģija"
+msgstr "قۇۋۋىتى"
 
 #: ui/main.qml:47
 #, kde-format
 msgctxt "current power draw from the battery in W"
 msgid "Consumption"
-msgstr "Patēriņš"
+msgstr "سەرپىياتى"
 
 #: ui/main.qml:47
 #, kde-format
@@ -94,7 +94,7 @@ msgstr "W"
 #: ui/main.qml:48
 #, kde-format
 msgid "Voltage"
-msgstr "Spriegums"
+msgstr "توك بېسىمى"
 
 #: ui/main.qml:48
 #, kde-format
@@ -105,7 +105,7 @@ msgstr "V"
 #: ui/main.qml:49
 #, kde-format
 msgid "Remaining energy"
-msgstr "Atlikusī enerģija"
+msgstr "قالغان ئېنېرگىيە"
 
 #: ui/main.qml:49 ui/main.qml:50 ui/main.qml:51
 #, kde-format
@@ -116,29 +116,29 @@ msgstr "Wh"
 #: ui/main.qml:50
 #, kde-format
 msgid "Last full charge"
-msgstr "Pēdējā pilnā uzlāde"
+msgstr "ئاخىرقى لىق توكلانغىنى"
 
 #: ui/main.qml:51
 #, kde-format
 msgid "Original charge capacity"
-msgstr "Sākotnējā uzlādes ietilpība"
+msgstr "ئەسلى توكلاش سىغىمى"
 
 #: ui/main.qml:55
 #, kde-format
 msgid "Environment"
-msgstr "Vide"
+msgstr "مۇھىت"
 
 #: ui/main.qml:57
 #, kde-format
 msgid "Temperature"
-msgstr "Temperatūra"
+msgstr "تېمپېراتۇرا"
 
 #: ui/main.qml:70
 #, kde-format
 msgctxt ""
 "@info:label The battery has a certain capability, such as `Rechargeable:`"
 msgid "Yes"
-msgstr "Jā"
+msgstr "ھەئە"
 
 #: ui/main.qml:71
 #, kde-format
@@ -146,13 +146,13 @@ msgctxt ""
 "@info:label The battery doesn't have a certain capability, such as "
 "`Rechargeable:`"
 msgid "No"
-msgstr "Nē"
+msgstr "ياق"
 
 #: ui/main.qml:75
 #, kde-format
 msgctxt "%1 is a percentage value"
 msgid "%1%"
-msgstr "%1 %"
+msgstr "%1%"
 
 #: ui/main.qml:81
 #, kde-format
@@ -164,155 +164,155 @@ msgstr "%1 %2"
 #, kde-format
 msgctxt "Degree Celsius"
 msgid "%1 °C"
-msgstr ""
+msgstr "%1 °C"
 
 #: ui/main.qml:96
 #, kde-format
 msgid "Not charging"
-msgstr "Neuzlādējas"
+msgstr "توكلىمايۋاتىدۇ"
 
 #: ui/main.qml:97
 #, kde-format
 msgid "Charging"
-msgstr "Uzlādējas"
+msgstr "توكلاۋاتىدۇ"
 
 #: ui/main.qml:98
 #, kde-format
 msgid "Discharging"
-msgstr "Izlādējas"
+msgstr "توكسىزلاۋاتىدۇ"
 
 #: ui/main.qml:99
 #, kde-format
 msgid "Fully charged"
-msgstr "Pilnībā uzlādēta"
+msgstr "تولۇق توكلاندى"
 
 #: ui/main.qml:105
 #, kde-format
 msgid "Lithium ion"
-msgstr "Litija jonu"
+msgstr "لىتىي ئىيون"
 
 #: ui/main.qml:106
 #, kde-format
 msgid "Lithium polymer"
-msgstr "Litija polimēru"
+msgstr "لىتىي پولىمېر"
 
 #: ui/main.qml:107
 #, kde-format
 msgid "Lithium iron phosphate"
-msgstr "Litija dzelzs fosfāta"
+msgstr "لىتىي تۆمۈر فوسفات"
 
 #: ui/main.qml:108
 #, kde-format
 msgid "Lead acid"
-msgstr "Svina skābes"
+msgstr "قوغۇشۇن كىسلاتاسى"
 
 #: ui/main.qml:109
 #, kde-format
 msgid "Nickel cadmium"
-msgstr "Niķeļa kadmija"
+msgstr "نىكېل كادمىي"
 
 #: ui/main.qml:110
 #, kde-format
 msgid "Nickel metal hydride"
-msgstr "Niķeļa metālhidrīda"
+msgstr "نىكېل مېتال ھىدرىد"
 
 #: ui/main.qml:111
 #, kde-format
 msgid "Unknown technology"
-msgstr "Nezināma tehnoloģija"
+msgstr "نامەلۇم تېخنىكا"
 
 #: ui/main.qml:127
 #, kde-format
 msgctxt "@info:status"
 msgid "No energy information available on this system"
-msgstr "Šai sistēmai nav energoinformācijas"
+msgstr "بۇ سىستېمىدا ھېچقانداق ئېنېرگىيە ئۇچۇرى يوق"
 
 #: ui/main.qml:228
 #, kde-format
 msgid "PDA Battery"
-msgstr "PDA baterija"
+msgstr "PDA توكدانى"
 
 #: ui/main.qml:229
 #, kde-format
 msgid "UPS Battery"
-msgstr "UPS baterija"
+msgstr "UPS توكدانى"
 
 #: ui/main.qml:230
 #, kde-format
 msgid "Internal Battery"
-msgstr "Iebūvētā baterija"
+msgstr "ئىچىدىكى توكدان"
 
 #: ui/main.qml:231
 #, kde-format
 msgid "Mouse Battery"
-msgstr "Peles baterija"
+msgstr "چاشقىنەك توكدانى"
 
 #: ui/main.qml:232
 #, kde-format
 msgid "Keyboard Battery"
-msgstr "Tastatūras baterija"
+msgstr "ھەرپتاختا توكدانى"
 
 #: ui/main.qml:233
 #, kde-format
 msgid "Keyboard/Mouse Battery"
-msgstr "Tastatūras/peles baterija"
+msgstr "چاشقىنەك/ھەرپتاختا توكدانى"
 
 #: ui/main.qml:234
 #, kde-format
 msgid "Camera Battery"
-msgstr "Kameras baterija"
+msgstr "كامېرا توكدانى"
 
 #: ui/main.qml:235
 #, kde-format
 msgid "Phone Battery"
-msgstr "Tālruņa baterija"
+msgstr "تېلېفون توكدانى"
 
 #: ui/main.qml:236
 #, kde-format
 msgid "Monitor Battery"
-msgstr "Monitora baterija"
+msgstr "كۆزەتكۈچ توكدانى"
 
 #: ui/main.qml:237
 #, kde-format
 msgid "Gaming Input Battery"
-msgstr "Spēļu ievades ierīces baterija"
+msgstr "ئويۇن كىرگۈزۈش ئۈسكۈنىسى توكدانى"
 
 #: ui/main.qml:238
 #, kde-format
 msgid "Bluetooth Battery"
-msgstr "„Bluetooth“ baterija"
+msgstr "كۆكچىش توكدانى"
 
 #: ui/main.qml:239
 #, kde-format
 msgid "Tablet Battery"
-msgstr "Planšetdatora baterija"
+msgstr "تاختا كومپيۇتېر توكدانى"
 
 #: ui/main.qml:240
 #, kde-format
 msgid "Headphone Battery"
-msgstr "Austiņu baterija"
+msgstr "تىڭشىغۇچ توكدانى"
 
 #: ui/main.qml:241
 #, kde-format
 msgid "Headset Battery"
-msgstr "Uzgalvas ierīces baterija"
+msgstr "مىكروفونلۇق تىڭشىغۇچ توكدانى"
 
 #: ui/main.qml:242
 #, kde-format
 msgid "Touchpad Battery"
-msgstr "Skārienpaliktņa baterija"
+msgstr "سەزگۈر تاختا توكدانى"
 
 #: ui/main.qml:273
 #, kde-format
 msgctxt "Battery charge percentage"
 msgid "%1% (Charging)"
-msgstr "%1 % (uzlādējas)"
+msgstr "%1% (توكلاۋاتىدۇ)"
 
 #: ui/main.qml:274
 #, kde-format
 msgctxt "Battery charge percentage"
 msgid "%1%"
-msgstr "%1 %"
+msgstr "%1%"
 
 #: ui/main.qml:314
 #, fuzzy, kde-format
@@ -327,90 +327,64 @@ msgstr "%1:"
 #| msgid "%1%"
 msgctxt "this is a format string, equivalent to '%'"
 msgid " %%"
-msgstr "%1 %"
+msgstr "%1%"
 
 #: ui/main.qml:334
 #, kde-format
 msgid "Charge Percentage"
-msgstr "Uzlādes līmenis procentuāli"
+msgstr "توكداننىڭ پىرسەنتى"
 
 #: ui/main.qml:344
 #, kde-format
 msgid "Energy Consumption"
-msgstr "Energopatēriņš"
+msgstr "ئېنېرگىيە سەرپىياتى"
 
 #: ui/main.qml:360
 #, kde-format
 msgid "Last hour"
-msgstr "Pēdējā stunda"
+msgstr "ئۆتكەن بىر سائەت"
 
 #: ui/main.qml:361
 #, kde-format
 msgid "Last 2 hours"
-msgstr "Pēdējās divas stundas"
+msgstr "ئۆتكەن 2 سائەت"
 
 #: ui/main.qml:362
 #, kde-format
 msgid "Last 12 hours"
-msgstr "Pēdējās 12 stundas"
+msgstr "ئۆتكەن 12 سائەت"
 
 #: ui/main.qml:363
 #, kde-format
 msgid "Last 24 hours"
-msgstr "Pēdējās 24 stundas"
+msgstr "ئۆتكەن 24 سائەت"
 
 #: ui/main.qml:364
 #, kde-format
 msgid "Last 48 hours"
-msgstr "Pēdējās 48 stundas"
+msgstr "ئۆتكەن 48 سائەت"
 
 #: ui/main.qml:365
 #, kde-format
 msgid "Last 7 days"
-msgstr "Pēdējās 7 dienas"
+msgstr "ئۆتكەن 7 كۈن"
 
 #: ui/main.qml:373
 #, kde-format
 msgid "Timespan"
-msgstr "Laikposms"
+msgstr "ۋاقىت تامغۇسى"
 
 #: ui/main.qml:374
 #, kde-format
 msgid "Timespan of data to display"
-msgstr "Laikposms, par kuru rādīt datus"
+msgstr "كۆرسىتىدىغان سانلىق مەلۇمات ۋاقىت تامغۇسى"
 
 #: ui/main.qml:380
 #, kde-format
 msgid "Refresh"
-msgstr "Pārlādēt"
+msgstr "يېڭىلا"
 
 #: ui/main.qml:439
 #, kde-format
 msgid "%1:"
 msgstr "%1:"
-
-#~ msgctxt "Degree Celsius"
-#~ msgid "°C"
-#~ msgstr "°C"
-
-#~ msgid "Unknown Battery"
-#~ msgstr "Nezināma baterija"
-
-#~ msgctxt "Graph axis label: power in Watts"
-#~ msgid "%1 W"
-#~ msgstr "%1 W"
-
-#~ msgctxt "Graph axis label: percentage"
-#~ msgid "%1%"
-#~ msgstr "%1 %"
-
-#~ msgctxt "Shorthand for Watts"
-#~ msgid "W"
-#~ msgstr "W"
-
-#~ msgctxt "literal percent sign"
-#~ msgid "%"
-#~ msgstr "%"
-
-#~ msgid "This type of history is currently not available for this device."
-#~ msgstr "Šāda veida vēsture šobrīd šai ierīcei nav pieejama."

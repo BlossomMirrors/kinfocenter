@@ -310,26 +310,18 @@ KCM.SimpleKCM {
                 points: history.points
                 xDuration: timespanCombo.duration
 
-                yLabel: root.historyType == HistoryModel.RateType ? root.format_unit(i18nc("Watt", "W"), 0) : root.format_percentage
+                yLabel: root.historyType === HistoryModel.RateType ?
+                    i18nc("A format string with %1 as the short symbol for Watt", "%.0f %1",  "W") :
+                    i18nc("A format string with %1 as the percentage symbol '%'", "%.0f %1","%");
                 yMax: {
-                    if (root.historyType == HistoryModel.RateType) {
+                    if (root.historyType === HistoryModel.RateType) {
                         // Ceil to next 10
                         return Math.floor(history.largestValue / 10) * 10 + 10;
                     } else {
                         return 100;
                     }
                 }
-                yStep: root.historyType == HistoryModel.RateType ? 10 : 25
-            }
-
-            // Reparented to keep the item outside of a layout and the graph canvas
-            Kirigami.PlaceholderMessage {
-                parent: graph
-                visible: graph.points.length < 2
-                x: graph.plotCenter.x - width / 2
-                y: graph.plotCenter.y - height / 2
-                width: graph.plot.width - (Kirigami.Units.largeSpacing * 4)
-                text: i18nc("@info:status", "No history information for this time span")
+                yStep: root.historyType === HistoryModel.RateType ? 10 : 25
             }
 
             footer: GridLayout {

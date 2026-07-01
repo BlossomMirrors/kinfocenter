@@ -53,6 +53,7 @@
   <name xml:lang="ta">தகவல் மையம்</name>
   <name xml:lang="tg">Маркази иттилоотӣ</name>
   <name xml:lang="tr">Bilgi Merkezi</name>
+  <name xml:lang="ug">ئۇچۇر مەركىزى</name>
   <name xml:lang="uk">Центр інформації</name>
   <name xml:lang="vi">Trung tâm thông tin</name>
   <name xml:lang="zh-CN">系统信息中心</name>
@@ -88,6 +89,7 @@
   <summary xml:lang="sl">Spoznajte strojno opremo in stanje sistema</summary>
   <summary xml:lang="sv">Ta reda på mer om systemets hårdvara och status</summary>
   <summary xml:lang="tr">Sistemdeki donanım ve sistem durumu hakkında bilgi alın</summary>
+  <summary xml:lang="ug">سىستېمىنىڭ قاتتىق دېتال ۋە ھالىتى ھەققىدىكى ئۇچۇرنى كۆرسىتىدۇ</summary>
   <summary xml:lang="uk">Дізнайтеся більше про обладнання та стан системи</summary>
   <summary xml:lang="zh-CN">显示系统硬件和状态信息</summary>
   <summary xml:lang="zh-TW">瞭解關於系統硬體與狀態的資訊</summary>
@@ -211,9 +213,9 @@
   </provides>
   <project_group>KDE</project_group>
   <releases>
+    <release version="6.7.2" date="2026-06-30"/>
+    <release version="6.7.1" date="2026-06-23"/>
+    <release version="6.7.0" date="2026-06-16"/>
     <release version="6.6.5" date="2026-05-12"/>
-    <release version="6.6.4" date="2026-04-06"/>
-    <release version="6.6.3" date="2026-03-17"/>
-    <release version="6.6.2" date="2026-03-03"/>
   </releases>
 </component>
