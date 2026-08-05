@@ -1,0 +1,23 @@
+From 150a3e778c2781793a82df4a74c6504c04b29dc8 Mon Sep 17 00:00:00 2001
+From: koyu <me@koyu.space>
+Date: Wed, 5 Aug 2026 14:03:15 +0200
+Subject: [PATCH] about-distro: add right margin to the logo
+
+Adds a 20px right margin to the distro logo icon so it doesn't sit
+flush against the name/version column next to it.
+---
+ kcms/about-distro/src/ui/main.qml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/kcms/about-distro/src/ui/main.qml b/kcms/about-distro/src/ui/main.qml
+index 7bd051b..f86d2c6 100644
+--- a/kcms/about-distro/src/ui/main.qml
++++ b/kcms/about-distro/src/ui/main.qml
+@@ -91,6 +91,7 @@ KCMUtils.SimpleKCM {
+                 source: kcm.distroLogo
+                 implicitWidth: Kirigami.Units.iconSizes.enormous
+                 implicitHeight: Kirigami.Units.iconSizes.enormous
++                Layout.rightMargin: 20
+             }
+ 
+             ColumnLayout {
