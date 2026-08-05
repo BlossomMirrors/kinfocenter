@@ -110,7 +110,7 @@ main() {
     apply_patches_to_spec "${spec}"
 
     echo "==> Installing build dependencies..."
-    sudo dnf builddep -y "${spec}"
+    sudo dnf builddep -y --no-best "${spec}"
 
     echo "==> Building kinfocenter RPMs..."
     rpmbuild -ba "${spec}" \

@@ -14,6 +14,14 @@ Defaults to `rawhide`. Pass a Fedora release number (e.g. `44`) to build against
 
 The script fetches the latest `kinfocenter` SRPM from Koji, caches it in `cache/` to avoid re-downloading, strips any mbox email headers from patch files, injects the patch declarations into the spec, installs build dependencies via `dnf builddep`, and runs `rpmbuild`.
 
+## Installing locally
+
+```
+./install.sh [fedora_version]
+```
+
+Builds (forwarding any argument to `build.sh`), then overlays `/usr` with `rpm-ostree usroverlay` and installs the patched `kinfocenter` RPM directly into the live system for testing. The overlay is transient and resets on reboot.
+
 ## Adding patches
 
 Drop `.patch` files into `patches/`. Files are applied in filename order, so prefix them with a zero-padded number (`0002-my-fix.patch`). Mbox-format patches (e.g. from `git format-patch`) work as-is.
@@ -23,3 +31,4 @@ Drop `.patch` files into `patches/`. Files are applied in filename order, so pre
 | # | Patch | Purpose |
 |---|-------|---------|
 | 0001 | About Distro: Serial Numbers section, PRETTY_NAME | Adds a Serial Numbers section (Machine ID from `/etc/machine-id`, Device ID derived from the primary MAC address) next to the existing system serial number, and switches the distro name/version display to `PRETTY_NAME` from os-release |
+| 0002 | About Distro: allow changing the hostname | Adds a Device Name row with a Rename action that sets the static hostname via systemd-hostnamed over D-Bus (its own polkit prompt handles authorization) |

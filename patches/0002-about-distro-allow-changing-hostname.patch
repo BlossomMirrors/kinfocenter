@@ -1,0 +1,271 @@
+From daef13a64113443ec6201fdb516402007a036df7 Mon Sep 17 00:00:00 2001
+From: koyu <me@koyu.space>
+Date: Wed, 5 Aug 2026 12:48:30 +0200
+Subject: [PATCH] about-distro: allow changing the hostname from the about page
+
+Adds a Device Name row to the about page with a Rename action that
+opens a dialog to set a new static hostname via systemd-hostnamed
+over D-Bus (interactive=true so hostnamed's own polkit prompt handles
+authorization).
+---
+ kcms/about-distro/src/CMakeLists.txt |  1 +
+ kcms/about-distro/src/main.cpp       | 53 ++++++++++++++++++++
+ kcms/about-distro/src/ui/main.qml    | 75 ++++++++++++++++++++++++++++
+ po/de/kcm_about-distro.po            | 36 +++++++++++++
+ 4 files changed, 165 insertions(+)
+
+diff --git a/kcms/about-distro/src/CMakeLists.txt b/kcms/about-distro/src/CMakeLists.txt
+index f573eb5..312cd24 100644
+--- a/kcms/about-distro/src/CMakeLists.txt
++++ b/kcms/about-distro/src/CMakeLists.txt
+@@ -42,6 +42,7 @@ target_link_libraries(kcm_about-distro  PRIVATE
+     KF6::KIOGui
+     KF6::AuthCore
+     Qt6::Network
++    Qt6::DBus
+     PkgConfig::libdrm
+ )
+ 
+diff --git a/kcms/about-distro/src/main.cpp b/kcms/about-distro/src/main.cpp
+index c7cc3e4..0ad8aa7 100644
+--- a/kcms/about-distro/src/main.cpp
++++ b/kcms/about-distro/src/main.cpp
+@@ -8,14 +8,19 @@
+ 
+ #include <QAbstractListModel>
+ #include <QClipboard>
++#include <QDBusConnection>
++#include <QDBusInterface>
++#include <QDBusReply>
+ #include <QFileInfo>
+ #include <QFile>
+ #include <QGuiApplication>
++#include <QHostInfo>
+ #include <QIcon>
+ #include <QLocale>
+ #include <QLoggingCategory>
+ #include <QCryptographicHash>
+ #include <QNetworkInterface>
++#include <QRegularExpression>
+ #include <QWindow>
+ 
+ #include <qqml.h>
+@@ -103,6 +108,26 @@ static QString getDeviceID()
+     return base32.left(12);
+ }
+ 
++// Helper: talk to systemd-hostnamed, which handles the polkit prompt itself
++static QDBusInterface hostnamedInterface()
++{
++    return QDBusInterface(QStringLiteral("org.freedesktop.hostname1"),
++                           QStringLiteral("/org/freedesktop/hostname1"),
++                           QStringLiteral("org.freedesktop.hostname1"),
++                           QDBusConnection::systemBus());
++}
++
++// Helper: read the static hostname, falling back to the transient one
++static QString readHostname()
++{
++    QDBusInterface hostname1 = hostnamedInterface();
++    const QString staticHostname = hostname1.property("StaticHostname").toString();
++    if (!staticHostname.isEmpty()) {
++        return staticHostname;
++    }
++    return QHostInfo::localHostName();
++}
++
+ class EntryModel : public QAbstractListModel
+ {
+     Q_OBJECT
+@@ -244,6 +269,8 @@ public:
+         const QString url = cg.readEntry("Website", os.homeUrl());
+         m_distroUrl = url;
+ 
++        m_hostName = readHostname();
++
+         Q_EMIT changed();
+     }
+ 
+@@ -413,6 +440,30 @@ public:
+         storeInClipboard(clipboardText(Entry::Language::English));
+     }
+ 
++    Q_INVOKABLE bool setHostname(const QString &newHostname)
++    {
++        const QString trimmed = newHostname.trimmed();
++        // RFC 1123 label: alphanumeric and hyphens, not starting or ending with a hyphen
++        static const QRegularExpression validHostname(QStringLiteral("^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?$"));
++        if (!validHostname.match(trimmed).hasMatch()) {
++            return false;
++        }
++        if (trimmed == m_hostName) {
++            return true;
++        }
++
++        QDBusInterface hostname1 = hostnamedInterface();
++        const QDBusReply<void> reply = hostname1.call(QStringLiteral("SetStaticHostname"), trimmed, true);
++        if (!reply.isValid()) {
++            qWarning("Failed to set hostname: %s", qUtf8Printable(reply.error().message()));
++            return false;
++        }
++
++        m_hostName = trimmed;
++        Q_EMIT changed();
++        return true;
++    }
++
+     Q_SCRIPTABLE static void storeInClipboard(const QString &text)
+     {
+         QGuiApplication::clipboard()->setText(text.trimmed());
+@@ -441,6 +492,8 @@ private:
+     QString m_distroVariant;
+     Q_PROPERTY(QString distroUrl MEMBER m_distroUrl NOTIFY changed)
+     QString m_distroUrl;
++    Q_PROPERTY(QString hostName MEMBER m_hostName NOTIFY changed)
++    QString m_hostName;
+ 
+     Q_PROPERTY(bool isEnglish MEMBER m_isEnglish CONSTANT)
+     const bool m_isEnglish = QLocale::system().language() == QLocale::English || QLocale::system().language() == QLocale::C;
+diff --git a/kcms/about-distro/src/ui/main.qml b/kcms/about-distro/src/ui/main.qml
+index 4c87e4c..7bd051b 100644
+--- a/kcms/about-distro/src/ui/main.qml
++++ b/kcms/about-distro/src/ui/main.qml
+@@ -31,6 +31,55 @@ KCMUtils.SimpleKCM {
+         desktopFileName: "org.kde.kinfocenter"
+     }
+ 
++    Kirigami.Dialog {
++        id: hostnameDialog
++
++        title: i18nc("@title:window", "Change Device Name")
++        preferredWidth: Kirigami.Units.gridUnit * 18
++        standardButtons: Kirigami.Dialog.Cancel
++        flatFooterButtons: true
++
++        onOpened: {
++            errorMessage.visible = false;
++            hostnameField.text = kcm.hostName;
++            hostnameField.forceActiveFocus();
++            hostnameField.selectAll();
++        }
++
++        customFooterActions: [
++            Kirigami.Action {
++                text: i18nc("@action:button", "Change")
++                icon.name: "dialog-ok"
++                onTriggered: source => {
++                    if (kcm.setHostname(hostnameField.text)) {
++                        hostnameDialog.close();
++                    } else {
++                        errorMessage.visible = true;
++                    }
++                }
++            }
++        ]
++
++        ColumnLayout {
++            Layout.fillWidth: true
++            spacing: Kirigami.Units.smallSpacing
++
++            QQC2.TextField {
++                id: hostnameField
++                Layout.fillWidth: true
++                Keys.onReturnPressed: hostnameDialog.customFooterActions[0].trigger()
++            }
++
++            Kirigami.InlineMessage {
++                id: errorMessage
++                Layout.fillWidth: true
++                visible: false
++                type: Kirigami.MessageType.Error
++                text: i18nc("@info", "That device name isn't valid, or the change wasn't authorized.")
++            }
++        }
++    }
++
+     ColumnLayout {
+         spacing: Kirigami.Units.largeSpacing
+ 
+@@ -157,6 +206,32 @@ KCMUtils.SimpleKCM {
+                 }
+             }
+ 
++            Item {
++                Kirigami.FormData.label: i18nc("@title:group", "Device")
++                Kirigami.FormData.isSection: true
++            }
++
++            RowLayout {
++                Kirigami.FormData.label: i18nc("@label", "Device Name:")
++                spacing: Kirigami.Units.smallSpacing
++
++                QQC2.Label {
++                    text: kcm.hostName
++                }
++
++                QQC2.ToolButton {
++                    icon.name: "edit-rename-symbolic"
++                    text: i18nc("@action:button", "Rename…")
++                    display: QQC2.ToolButton.IconOnly
++
++                    QQC2.ToolTip.text: text
++                    QQC2.ToolTip.visible: hovered
++                    QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
++
++                    onClicked: hostnameDialog.open()
++                }
++            }
++
+             Item {
+                 Kirigami.FormData.label: i18nc("@title:group", "Software")
+                 Kirigami.FormData.isSection: true
+diff --git a/po/de/kcm_about-distro.po b/po/de/kcm_about-distro.po
+index 069bf0f..b5b1193 100644
+--- a/po/de/kcm_about-distro.po
++++ b/po/de/kcm_about-distro.po
+@@ -126,6 +126,42 @@ msgctxt "@label"
+ msgid "Device ID:"
+ msgstr "Gerätenummer:"
+ 
++#: ui/main.qml:37
++#, kde-format
++msgctxt "@title:window"
++msgid "Change Device Name"
++msgstr "Gerätenamen ändern"
++
++#: ui/main.qml:51
++#, kde-format
++msgctxt "@action:button"
++msgid "Change"
++msgstr "Ändern"
++
++#: ui/main.qml:78
++#, kde-format
++msgctxt "@info"
++msgid "That device name isn't valid, or the change wasn't authorized."
++msgstr "Der Gerätename ist ungültig oder die Änderung wurde nicht autorisiert."
++
++#: ui/main.qml:210
++#, kde-format
++msgctxt "@title:group"
++msgid "Device"
++msgstr "Gerät"
++
++#: ui/main.qml:215
++#, kde-format
++msgctxt "@label"
++msgid "Device Name:"
++msgstr "Gerätename:"
++
++#: ui/main.qml:224
++#, kde-format
++msgctxt "@action:button"
++msgid "Rename…"
++msgstr "Umbenennen …"
++
+ #: main.cpp:214 main.cpp:231
+ #, kde-format
+ msgctxt "@label unknown entry in table"
+-- 
+2.55.0
+
