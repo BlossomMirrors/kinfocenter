@@ -6,6 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${SCRIPT_DIR}/build"
 CACHE_DIR="${SCRIPT_DIR}/cache"
 
+rm -rf build cache
+
 patch_file_list() {
     # Sort by basename (the zero-padded number prefix) so patches apply in order.
     find "${SCRIPT_DIR}/patches" -name '*.patch' -printf '%f\t%p\n' | sort | cut -f2-
