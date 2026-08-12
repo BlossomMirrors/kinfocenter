@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -eou pipefail
 
-FEDORA_VERSION="${1:-rawhide}"
+FEDORA_VERSION="${1:-44}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${SCRIPT_DIR}/build"
 CACHE_DIR="${SCRIPT_DIR}/cache"
