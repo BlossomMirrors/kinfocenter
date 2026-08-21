@@ -2,6 +2,7 @@
 set -eou pipefail
 
 FEDORA_VERSION="${1:-44}"
+PINNED_VERSION="6.7.3"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${SCRIPT_DIR}/build"
 CACHE_DIR="${SCRIPT_DIR}/cache"
@@ -14,12 +15,27 @@ patch_file_list() {
 }
 
 fetch_srpm() {
-    local nvr
+    local tags
     if [[ "${FEDORA_VERSION}" == "rawhide" ]]; then
-        nvr="$(koji latest-build rawhide kinfocenter | awk '/^kinfocenter/{print $1; exit}')"
+        tags=("rawhide")
     else
-        nvr="$(koji latest-build "f${FEDORA_VERSION}-updates" kinfocenter 2>/dev/null | awk '/^kinfocenter/{print $1; exit}')"
-        [[ -z "$nvr" ]] && nvr="$(koji latest-build "f${FEDORA_VERSION}" kinfocenter | awk '/^kinfocenter/{print $1; exit}')"
+        tags=("f${FEDORA_VERSION}-updates" "f${FEDORA_VERSION}")
+    fi
+
+    # Pin to a known-good release instead of tracking whatever koji currently
+    # considers latest, so patches don't silently rot against a newer upstream.
+    local nvr tag
+    for tag in "${tags[@]}"; do
+        nvr="$(koji list-tagged "${tag}" kinfocenter 2>/dev/null \
+            | awk '{print $1}' \
+            | grep -E "^kinfocenter-${PINNED_VERSION//./\\.}-[0-9]+\." \
+            | sort -t- -k3 -n | tail -1)"
+        [[ -n "${nvr}" ]] && break
+    done
+
+    if [[ -z "${nvr}" ]]; then
+        echo "==> No kinfocenter-${PINNED_VERSION} build found in ${tags[*]}" >&2
+        exit 1
     fi
 
     local cached="${CACHE_DIR}/${nvr}.src.rpm"
