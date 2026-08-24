@@ -1,0 +1,98 @@
+From acb992f26bc871e445bcf0232601c5fa406d8537 Mon Sep 17 00:00:00 2001
+From: koyu <me@koyu.space>
+Date: Mon, 24 Aug 2026 02:12:53 +0200
+Subject: [PATCH] about-distro: show the currently booted image in the Software
+ section
+
+Adds a Booted Image entry to the Software section that reads the
+container image reference of the booted deployment from
+'rpm-ostree status --json', stripping the ostree transport prefix
+so only the plain image reference (e.g.
+registry.blossomos.org/blossom/image-dev:latest-dx) is shown.
+---
+ kcms/about-distro/src/main.cpp | 33 ++++++++++++++++++++++++++++++++-
+ po/de/kcm_about-distro.po      |  6 ++++++
+ 2 files changed, 38 insertions(+), 1 deletion(-)
+
+diff --git a/kcms/about-distro/src/main.cpp b/kcms/about-distro/src/main.cpp
+index 0ad8aa7..fbb0e65 100644
+--- a/kcms/about-distro/src/main.cpp
++++ b/kcms/about-distro/src/main.cpp
+@@ -16,10 +16,14 @@
+ #include <QGuiApplication>
+ #include <QHostInfo>
+ #include <QIcon>
++#include <QJsonArray>
++#include <QJsonDocument>
++#include <QJsonObject>
+ #include <QLocale>
+ #include <QLoggingCategory>
+ #include <QCryptographicHash>
+ #include <QNetworkInterface>
++#include <QProcess>
+ #include <QRegularExpression>
+ #include <QWindow>
+ 
+@@ -128,6 +132,32 @@ static QString readHostname()
+     return QHostInfo::localHostName();
+ }
+ 
++// Helper: read the currently booted container image reference via rpm-ostree
++static QString getBootedImage()
++{
++    QProcess process;
++    process.start(QStringLiteral("rpm-ostree"), {QStringLiteral("status"), QStringLiteral("--json")});
++    if (!process.waitForFinished(5000) || process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
++        return QString();
++    }
++
++    const QJsonDocument doc = QJsonDocument::fromJson(process.readAllStandardOutput());
++    const QJsonArray deployments = doc.object().value(QStringLiteral("deployments")).toArray();
++    for (const auto &value : deployments) {
++        const QJsonObject deployment = value.toObject();
++        if (!deployment.value(QStringLiteral("booted")).toBool()) {
++            continue;
++        }
++        QString ref = deployment.value(QStringLiteral("container-image-reference")).toString();
++        // Strip the ostree transport prefix (e.g. "ostree-unverified-registry:") and any
++        // leftover "docker://" scheme, leaving just the plain image reference.
++        static const QRegularExpression transportPrefix(QStringLiteral("^ostree-[a-z-]+:(docker://)?"));
++        ref.remove(transportPrefix);
++        return ref;
++    }
++    return QString();
++}
++
+ class EntryModel : public QAbstractListModel
+ {
+     Q_OBJECT
+@@ -344,7 +374,8 @@ public:
+                           new Entry(ki18n("KDE Frameworks Version:"), KCoreAddons::versionString()),
+                           new Entry(ki18n("Qt Version:"), QString::fromLatin1(qVersion())),
+                           new KernelEntry(),
+-                          new GraphicsPlatformEntry()});
++                          new GraphicsPlatformEntry(),
++                          new Entry(ki18nc("@label", "Booted Image:"), getBootedImage())});
+ 
+         // Add any extraData entries
+         if (!m_extraDataEntries.empty()) {
+diff --git a/po/de/kcm_about-distro.po b/po/de/kcm_about-distro.po
+index b5b1193..8eff83e 100644
+--- a/po/de/kcm_about-distro.po
++++ b/po/de/kcm_about-distro.po
+@@ -184,6 +184,12 @@ msgstr "KDE-Frameworks-Version:"
+ msgid "Qt Version:"
+ msgstr "Qt-Version:"
+ 
++#: main.cpp:378
++#, kde-format
++msgctxt "@label"
++msgid "Booted Image:"
++msgstr "Gestartetes Abbild:"
++
+ #: MemoryEntry.cpp:24
+ #, kde-format
+ msgid "Memory:"
+-- 
+2.55.0
+
