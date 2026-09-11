@@ -2,7 +2,7 @@
 set -eou pipefail
 
 FEDORA_VERSION="${1:-44}"
-PINNED_VERSION="6.7.4"
+PINNED_VERSION="6.7.5"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${SCRIPT_DIR}/build"
 CACHE_DIR="${SCRIPT_DIR}/cache"
