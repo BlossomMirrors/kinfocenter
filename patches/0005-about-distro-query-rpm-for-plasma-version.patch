@@ -1,0 +1,53 @@
+From f3738ab6a2f4ba46e4edb2b18b2a6223bdfac46b Mon Sep 17 00:00:00 2001
+From: koyu <me@koyu.space>
+Date: Fri, 11 Sep 2026 08:20:14 +0200
+Subject: [PATCH] about-distro: query rpm for the actual Plasma version
+
+The KDE Plasma Version entry in the about page simply echoed
+kinfocenter's own PROJECT_VERSION, which is fine upstream where
+kinfocenter ships in lockstep with the rest of Plasma but is
+misleading on BlossomOS, where kinfocenter's build is pinned
+independently of the plasma-desktop package in the image.
+
+Query the installed plasma-desktop package's version via rpm
+instead (equivalent to
+rpm -qi --queryformat '%{VERSION}' plasma-desktop | tail -n1),
+falling back to PROJECT_VERSION if the query fails.
+---
+ kcms/about-distro/src/PlasmaEntry.cpp | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/kcms/about-distro/src/PlasmaEntry.cpp b/kcms/about-distro/src/PlasmaEntry.cpp
+index 75c914f..c5e56b3 100644
+--- a/kcms/about-distro/src/PlasmaEntry.cpp
++++ b/kcms/about-distro/src/PlasmaEntry.cpp
+@@ -7,6 +7,7 @@
+ 
+ #include <KConfigGroup>
+ #include <KDesktopFile>
++#include <QProcess>
+ #include <QStandardPaths>
+ 
+ #include "Version.h"
+@@ -23,6 +24,20 @@ PlasmaEntry::PlasmaEntry()
+ 
+ QString PlasmaEntry::plasmaVersion()
+ {
+-    // KInfoCenter is part of Plasma. Simply show our version!
++    // KInfoCenter can be pinned ahead of the rest of the Plasma stack shipped
++    // in the image, so ask rpm for the actually installed plasma-desktop
++    // version instead of trusting our own PROJECT_VERSION.
++    QProcess rpm;
++    rpm.start(QStringLiteral("rpm"),
++              {QStringLiteral("-qi"), QStringLiteral("--queryformat"), QStringLiteral("%{VERSION}\n"), QStringLiteral("plasma-desktop")});
++    rpm.waitForFinished();
++
++    if (rpm.exitStatus() == QProcess::NormalExit && rpm.exitCode() == 0) {
++        const QStringList lines = QString::fromLatin1(rpm.readAllStandardOutput()).split(QLatin1Char('\n'), Qt::SkipEmptyParts);
++        if (!lines.isEmpty()) {
++            return lines.last();
++        }
++    }
++
+     return QString::fromLatin1(PROJECT_VERSION);
+ }
