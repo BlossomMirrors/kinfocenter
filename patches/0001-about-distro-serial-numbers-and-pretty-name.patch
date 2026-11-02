@@ -190,19 +190,17 @@ diff --git a/kcms/about-distro/src/ui/main.qml b/kcms/about-distro/src/ui/main.q
 index 7f2b4da1..4c87e4c2 100644
 --- a/kcms/about-distro/src/ui/main.qml
 +++ b/kcms/about-distro/src/ui/main.qml
-@@ -176,6 +176,16 @@ KCMUtils.SimpleKCM {
-                 model: kcm.hardwareEntries
-                 delegate: entryComponent
+@@ -172,6 +172,14 @@ KCMUtils.SimpleKCM {
+                     delegate: entryComponent
+                 }
              }
 +
-+            Item {
-+                Kirigami.FormData.label: i18nc("@title:group", "Serial Numbers")
-+                Kirigami.FormData.isSection: true
-+            }
-+
-+            Repeater {
-+                model: kcm.serialNumbersEntries
-+                delegate: entryComponent
++            Kirigami.FormGroup {
++                title: i18nc("@title:group", "Serial Numbers")
++                Repeater {
++                    model: kcm.serialNumbersEntries
++                    delegate: entryComponent
++                }
 +            }
          }
      }

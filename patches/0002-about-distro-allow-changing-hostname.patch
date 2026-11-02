@@ -186,39 +186,41 @@ index 4c87e4c..7bd051b 100644
      ColumnLayout {
          spacing: Kirigami.Units.largeSpacing
  
-@@ -157,6 +206,32 @@ KCMUtils.SimpleKCM {
+@@ -157,6 +206,34 @@ KCMUtils.SimpleKCM {
                  }
              }
  
-+            Item {
-+                Kirigami.FormData.label: i18nc("@title:group", "Device")
-+                Kirigami.FormData.isSection: true
++            Kirigami.FormGroup {
++                title: i18nc("@title:group", "Device")
++
++                Kirigami.FormEntry {
++                    Layout.fillWidth: true
++                    title: i18nc("@label", "Device Name:")
++                    contentItem: RowLayout {
++                        spacing: Kirigami.Units.smallSpacing
++
++                        QQC2.Label {
++                            text: kcm.hostName
++                        }
++
++                        QQC2.ToolButton {
++                            icon.name: "edit-rename-symbolic"
++                            text: i18nc("@action:button", "Rename…")
++                            display: QQC2.ToolButton.IconOnly
++
++                            QQC2.ToolTip.text: text
++                            QQC2.ToolTip.visible: hovered
++                            QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
++
++                            onClicked: hostnameDialog.open()
++                        }
++                    }
++                }
 +            }
 +
-+            RowLayout {
-+                Kirigami.FormData.label: i18nc("@label", "Device Name:")
-+                spacing: Kirigami.Units.smallSpacing
-+
-+                QQC2.Label {
-+                    text: kcm.hostName
-+                }
-+
-+                QQC2.ToolButton {
-+                    icon.name: "edit-rename-symbolic"
-+                    text: i18nc("@action:button", "Rename…")
-+                    display: QQC2.ToolButton.IconOnly
-+
-+                    QQC2.ToolTip.text: text
-+                    QQC2.ToolTip.visible: hovered
-+                    QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
-+
-+                    onClicked: hostnameDialog.open()
-+                }
-+            }
-+
-             Item {
-                 Kirigami.FormData.label: i18nc("@title:group", "Software")
-                 Kirigami.FormData.isSection: true
+             Kirigami.FormGroup {
+                 title: i18nc("@title:group", "Software")
+                 Repeater {
 diff --git a/po/de/kcm_about-distro.po b/po/de/kcm_about-distro.po
 index 069bf0f..b5b1193 100644
 --- a/po/de/kcm_about-distro.po
