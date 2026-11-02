@@ -7,7 +7,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${SCRIPT_DIR}/build"
 CACHE_DIR="${SCRIPT_DIR}/cache"
 
-rm -rf build cache
+if [[ -z "${CI:-}" && ! -f /run/.toolboxenv ]]; then
+    container="blossomos-build-f${FEDORA_VERSION}"
+    if ! podman container exists "${container}"; then
+        toolbox create -y --distro fedora --release "${FEDORA_VERSION}" "${container}"
+    fi
+    toolbox run --container "${container}" sudo dnf install -y \
+        koji rpm-build dnf-plugins-core python3 findutils
+    exec toolbox run --container "${container}" bash "${SCRIPT_DIR}/build.sh" "${FEDORA_VERSION}"
+fi
+
+rm -rf "${BUILD_DIR}" "${CACHE_DIR}"
 
 patch_file_list() {
     # Sort by basename (the zero-padded number prefix) so patches apply in order.
